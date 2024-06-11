@@ -17,7 +17,16 @@ const lightbox = new SimpleLightbox('.photo-card a');
 
 const fetchFunc = async function() {
   try {
-    const response = await fetch(`https://pixabay.com/api/?key=44209717-4a56fa844a5258582c59ce6a4&q=${search}&image_type=photo&orientation=horizontal&safesearch=true&per_page=40&page=${page}`);
+    const response = await axios.get(`https://pixabay.com/api/`, {
+      params: {
+        q: search,
+        image_type: 'photo',
+        orientation: 'horizontal',
+        safesearch: true,
+        per_page: 40,
+        page: page
+      }
+    });
     dataStore = await response.json();
     const mappedData = dataStore.hits.map(i => `
       <div class='photo-card'>
