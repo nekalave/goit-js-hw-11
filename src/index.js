@@ -4,8 +4,6 @@ import 'notiflix/dist/notiflix-3.2.7.min.css';
 import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
 
-axios.defaults.headers.common['x-api-key'] = '44209717-4a56fa844a5258582c59ce6a4';
-
 const searchForm = document.querySelector('.search-form');
 const gallery = document.querySelector('.gallery');
 const loadMore = document.querySelector('.load-more-button');
@@ -19,6 +17,7 @@ const fetchFunc = async function() {
   try {
     const response = await axios.get(`https://pixabay.com/api/`, {
       params: {
+        key: '44209717-4a56fa844a5258582c59ce6a4',
         q: search,
         image_type: 'photo',
         orientation: 'horizontal',
@@ -27,7 +26,7 @@ const fetchFunc = async function() {
         page: page
       }
     });
-    dataStore = await response.json();
+    const dataStore = response.data;
     const mappedData = dataStore.hits.map(i => `
       <div class='photo-card'>
         <a href='${i.largeImageURL}'><img class='search-img' src='${i.webformatURL}' alt='${i.tags}' loading='lazy' /></a>
