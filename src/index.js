@@ -23,11 +23,19 @@ const fetchFunc = async function() {
         orientation: 'horizontal',
         safesearch: true,
         per_page: 40,
-        page: page
-      }
+        page: page,
+      },
     });
-    const dataStore = response.data;
-    const mappedData = dataStore.hits.map(i => `
+    dataStore = response.data;
+
+  } catch (error) {
+    console.error('Error fetching data:', error);
+    Notiflix.Notify.failure('Failed to fetch data');
+  }
+};
+
+const renderGallery = () => {
+  const mappedData = dataStore.hits.map(i => `
       <div class='photo-card'>
         <a href='${i.largeImageURL}'><img class='search-img' src='${i.webformatURL}' alt='${i.tags}' loading='lazy' /></a>
         <div class='info'>
@@ -50,27 +58,23 @@ const fetchFunc = async function() {
         </div>
       </div>
     `).join('');
-    gallery.insertAdjacentHTML('beforeend', mappedData);
-    lightbox.refresh();
+  gallery.insertAdjacentHTML('beforeend', mappedData);
+  lightbox.refresh();
 
-    if (page === 1) {
-      if (dataStore.hits.length === 0) {
-        Notiflix.Notify.failure('Sorry, there are no images matching your search query. Please try again.');
-      } else if (currentNumber > dataStore.totalHits) {
-        Notiflix.Notify.success(`We're sorry, but you've reached the end of search results.`);
-        loadMore.style.display = 'none';
-      } else {
-        Notiflix.Notify.success(`Hooray! We found ${dataStore.totalHits} images.`);
-        loadMore.style.display = 'inline-block';
-      }
+  if (page === 1) {
+    if (dataStore.hits.length === 0) {
+      Notiflix.Notify.failure('Sorry, there are no images matching your search query. Please try again.');
+    } else if (currentNumber > dataStore.totalHits) {
+      Notiflix.Notify.success(`Hooray! We found ${dataStore.totalHits} images.`);
+      loadMore.style.display = 'none';
+    } else {
+      Notiflix.Notify.success(`Hooray! We found ${dataStore.totalHits} images.`);
+      loadMore.style.display = 'inline-block';
     }
-  } catch (error) {
-    console.error('Error fetching data:', error);
-    Notiflix.Notify.failure('Failed to fetch data');
   }
 };
 
-searchForm.addEventListener('submit',  (event) => {
+searchForm.addEventListener('submit', async (event) => {
   event.preventDefault();
   page = 1;
   currentNumber = 40;
@@ -79,20 +83,21 @@ searchForm.addEventListener('submit',  (event) => {
     gallery.removeChild(gallery.firstChild);
   }
   loadMore.style.display = 'none';
-   fetchFunc();
+  await fetchFunc();
+  renderGallery();
 });
 
 loadMore.addEventListener('click', async () => {
   page++;
-  currentNumber += 40
+  currentNumber += 40;
   await fetchFunc();
-
+  renderGallery();
   if (gallery && gallery.firstElementChild) {
     const { height: cardHeight } = gallery.firstElementChild.getBoundingClientRect();
 
     window.scrollBy({
       top: cardHeight * 2,
-      behavior: "smooth",
+      behavior: 'smooth',
     });
   } else {
     console.error('Element with class "gallery" or its first child not found');
